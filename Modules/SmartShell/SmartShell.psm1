@@ -180,7 +180,7 @@ function Smartshell {
             Write-Host "✨ " -NoNewline -ForegroundColor Magenta
             $userInput = Read-Host
             if ($userInput -match "^exit$|^quit$") { break }
-            Smart-Write -Line $userInput
+            Smart-Write -Line ($userInput.Trim())
         }
         Write-Host "`n👋 Goodbye!" -ForegroundColor Green
     }
