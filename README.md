@@ -13,6 +13,7 @@ Or manually copy `Modules/SmartShell/` to your PowerShell modules directory.
 Or.... Enter this command
 ```powershell
 npx install git+https://github.com/JovianOps/SmartShell.git
+
 ## Usage
 
 ```powershell
