@@ -18,8 +18,9 @@ $Emoji = @{
 }
 
 function Get-Time {
+    $tz = [System.TimeZoneInfo]::Local
     $now = Get-Date
-    Write-Host "🕒 Current time: $($now.ToString('HH:mm:ss'))" -ForegroundColor Green
+    Write-Host "🕒 Current time: $($now.ToString('HH:mm:ss')) (WITA)" -ForegroundColor Green
 }
 
 function Get-DateInfo {
@@ -68,6 +69,11 @@ function Get-Weather {
     } catch {
         Write-Host "🌤️ Offline - weather data unavailable" -ForegroundColor DarkGray
     }
+}
+
+function Get-Timezone {
+    $tz = [System.TimeZoneInfo]::Local
+    Write-Host "🕒 Time: $(Get-Date -Format 'HH:mm:ss') ($($tz.DisplayName))" -ForegroundColor Green
 }
 
 function Get-CpuInfo {

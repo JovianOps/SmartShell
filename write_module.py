@@ -93,6 +93,7 @@ function smartshell {
         $cmd = $InputScript.Trim()
         Smart-Write -Line $cmd
     } else {
+        Write-Host " Made by Athalla. All rights reserved.  " -ForegroundColor B
         Write-Host "========================================" -ForegroundColor Blue
         Write-Host "   SmartShell v1.0 - Expressive Terminal" -ForegroundColor Blue
         Write-Host "========================================" -ForegroundColor Blue
@@ -126,7 +127,7 @@ psd1_content = """@{
     ModuleVersion     = '1.0.0'
     GUID              = 'b8a4e2c1-9f3d-4a5b-8e6f-1a2b3c4d5e6f'
     Author            = 'JovianOps'
-    CompanyName       = 'JovianOps'
+    CompanyName       = 'Vortex Industries'
     Description       = 'Expressive terminal with emoji reactions'
     FunctionsToExport = @('smartshell', 'Smart-Write', 'Get-Time', 'Get-DateInfo', 'Get-DiskInfo', 'Get-Uptime')
     CmdletsToExport   = @()

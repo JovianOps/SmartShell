@@ -21,7 +21,7 @@ $Emoji = @{
 
 function Get-Time {
     $now = Get-Date
-    Write-Host "🕒 Current time: $($now.ToString('HH:mm:ss'))" -ForegroundColor Green
+    Write-Host "🕒 Current time: $($now.ToString('HH:mm:ss')) (WITA)" -ForegroundColor Green
 }
 
 function Get-DateInfo {
