@@ -14,7 +14,7 @@ Or.... Enter this command
 ```Command Prompt/Powershell
 npx install git+https://github.com/JovianOps/SmartShell.git
 ```
-##Usage
+## Usage
 
 ```Command prompt/Powershell
 smartshell time          # Show current time
