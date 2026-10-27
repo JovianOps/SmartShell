@@ -47,6 +47,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). **Linux/Ubuntu support is needed** — P
 
 ## Understanding commands
 I will show you how types of command works.
- smartshell memory shows you how much ram usage you have right now.
- smartshell calc shows you the answer to the expression question you have right now.
- smartshell echo shows you echo message and there might be some emojis(thats supposed to be there its good for yall)
+-smartshell memory shows you how much ram usage you have right now.
+-smartshell calc shows you the answer to the expression question you have right now.
+-smartshell echo shows you echo message and there might be some emojis(thats supposed to be there its good for yall)
