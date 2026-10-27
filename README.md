@@ -8,8 +8,7 @@ Expressive terminal for PowerShell 7.6.6+ with emoji reactions and smart command
 INSTALL_SMARTSHELL.bat
 ```
 
-Or manually copy `Modules/SmartShell/` to your PowerShell modules directory.
-
+Or manually copy `Modules/SmartShell/` to your PowerShell modules directory. Or use this command npx install git+https://github.com/JovianOps/SmartShell.git
 ## Usage
 
 ```powershell
