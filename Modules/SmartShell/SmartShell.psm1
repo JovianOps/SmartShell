@@ -52,7 +52,19 @@ function Get-NetworkInfo {
 }
 
 function Get-Weather {
-    Write-Host "🌤️ Weather: Check https://wttr.in for current conditions" -ForegroundColor Blue
+    param([string]$Location = "")
+    $escapedLocation = if ($Location) { $Location.Replace(' ','+') } else { "" }
+    $url = if ($escapedLocation) { "https://wttr.in/$escapedLocation" } else { "https://wttr.in" }
+    try {
+        $resp = curl.exe -s --max-time 5 --get "$url" --data-urlencode "format=3" 2>$null
+        if ($resp) {
+            Write-Host "🌤️ $resp" -ForegroundColor Blue
+        } else {
+            Write-Host "🌤️ Offline - weather data unavailable" -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Host "🌤️ Offline - weather data unavailable" -ForegroundColor DarkGray
+    }
 }
 
 function Get-CpuInfo {
@@ -115,6 +127,7 @@ function Smart-Write {
         "^mem$" { Get-MemoryInfo }
         "^ip$" { Get-NetworkInfo }
         "^network$" { Get-NetworkInfo }
+        "^weather\s+(.+)$" { Get-Weather -Location $matches[1] }
         "^weather$" { Get-Weather }
         "^cpu$" { Get-CpuInfo }
         "^gpu$" { Get-GpuInfo }
@@ -141,7 +154,7 @@ Available commands:
   disk            - Show disk usage
   memory / mem    - Show RAM usage
   ip / network    - Show network IP
-  weather         - Show weather info
+  weather [location]  - Show weather (e.g. weather bromo)
   cpu             - Show CPU info
   gpu             - Show GPU info
   processes       - Show top 10 processes

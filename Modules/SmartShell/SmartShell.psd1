@@ -5,7 +5,7 @@
     Author            = 'JovianOps'
     CompanyName       = 'JovianOps'
     Description       = 'Expressive terminal with emoji reactions'
-    FunctionsToExport = @('Smartshell', 'Smart-Write', 'Get-Time', 'Get-DateInfo', 'Get-DiskInfo', 'Get-Uptime')
+    FunctionsToExport = @('Smartshell', 'Smart-Write', 'Get-Time', 'Get-DateInfo', 'Get-DiskInfo', 'Get-Uptime', 'Get-MemoryInfo', 'Get-NetworkInfo', 'Get-Weather', 'Get-CpuInfo', 'Get-GpuInfo', 'Get-ProcessList', 'Get-ListeningPorts', 'Get-EnvInfo', 'Get-Whoami', 'Show-Expression')
     CmdletsToExport   = @()
     VariablesToExport = @()
     AliasesToExport   = @()
