@@ -1,5 +1,10 @@
 ﻿param([Parameter(ValueFromRemainingArguments=$true)][string[]]$InputScript)
 
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+$DefaultLocation = "Palangkaraya"
+
 $Emoji = @{
     ":)" = "😊"; ":(" = "😞"; ";)" = "😉"
     "<3" = "❤️"; ":o" = "😮"; ":p" = "😛"
@@ -53,8 +58,8 @@ function Get-NetworkInfo {
 
 function Get-Weather {
     param([string]$Location = "")
-    $escapedLocation = if ($Location) { $Location.Replace(' ','+') } else { "" }
-    $url = if ($escapedLocation) { "https://wttr.in/$escapedLocation" } else { "https://wttr.in" }
+    $loc = if ($Location) { $Location.Replace(' ','+') } else { $DefaultLocation.Replace(' ','+') }
+    $url = "https://wttr.in/$loc"
     try {
         $resp = curl.exe -s --max-time 5 --get "$url" --data-urlencode "format=3" 2>$null
         if ($resp) {
