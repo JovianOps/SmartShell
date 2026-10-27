@@ -18,7 +18,9 @@ echo.
 echo Or run a quick command:
 echo   smartshell time
 echo   smartshell echo I am happy
-echo   smartshell calc 2*3+5
+echo   smartshell calc
+echo   smartshell memory
+echo bojack is the goat
 echo.
 echo Source: %MODULE_SRC%
 echo.

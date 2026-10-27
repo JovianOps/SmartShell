@@ -12,17 +12,16 @@ INSTALL_SMARTSHELL.bat
 
 Or manually copy `Modules/SmartShell/` to your PowerShell modules directory.
 
-### Any OS with Node.js
+### Quick Clone (any OS with Node.js)
 
 ```bash
 npx degit JovianOps/SmartShell
 ```
 
 Then run `INSTALL_SMARTSHELL.bat` (Windows) or copy files manually (Linux/macOS — experimental).
-
 ## Usage
 
-```powershell
+```Command prompt/Powershell
 smartshell time          # Show current time
 smartshell date          # Show today's date
 smartshell uptime        # Show system uptime
