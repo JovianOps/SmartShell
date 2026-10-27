@@ -11,12 +11,12 @@ INSTALL_SMARTSHELL.bat
 Or manually copy `Modules/SmartShell/` to your PowerShell modules directory.
 
 Or.... Enter this command
-```Command Prompt
+```Command Prompt/Powershell
 npx install git+https://github.com/JovianOps/SmartShell.git
-
-## Usage
-
 ```
+##Usage
+
+```Command prompt/Powershell
 smartshell time          # Show current time
 smartshell date          # Show today's date
 smartshell uptime        # Show system uptime
