@@ -1,4 +1,4 @@
-﻿param($InputScript = "")
+﻿param([Parameter(ValueFromRemainingArguments=$true)][string[]]$InputScript)
 
 $Emoji = @{
     ":)" = "😊"; ":(" = "😞"; ";)" = "😉"
