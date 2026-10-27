@@ -3,7 +3,10 @@
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-$DefaultLocation = "Palangkaraya"
+$DefaultLocation = $env:SMARTSHELL_WEATHER_LOCATION
+if (-not $DefaultLocation) {
+    $DefaultLocation = "auto"
+}
 
 $Emoji = @{
     ":)" = "😊"; ":(" = "😞"; ";)" = "😉"
@@ -20,6 +23,7 @@ $Emoji = @{
 }
 
 function Get-Time {
+    $tz = [System.TimeZoneInfo]::Local
     $now = Get-Date
     Write-Host "🕒 Current time: $($now.ToString('HH:mm:ss')) (WITA)" -ForegroundColor Green
 }
@@ -58,8 +62,10 @@ function Get-NetworkInfo {
 
 function Get-Weather {
     param([string]$Location = "")
-    $loc = if ($Location) { $Location.Replace(' ','+') } else { $DefaultLocation.Replace(' ','+') }
-    $url = "https://wttr.in/$loc"
+    $loc = if ($Location) { $Location.Replace(' ','+') } else {
+        if ($DefaultLocation -eq "auto") { "" } else { $DefaultLocation.Replace(' ','+') }
+    }
+    $url = if ($loc) { "https://wttr.in/$loc" } else { "https://wttr.in" }
     try {
         $resp = curl.exe -s --max-time 5 --get "$url" --data-urlencode "format=3" 2>$null
         if ($resp) {

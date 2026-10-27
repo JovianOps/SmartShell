@@ -93,11 +93,11 @@ function smartshell {
         $cmd = $InputScript.Trim()
         Smart-Write -Line $cmd
     } else {
-        Write-Host " Made by Athalla. All rights reserved.  " -ForegroundColor B
+        Write-Host " Made By Athalla. All rights reserved.  " -ForegroundColor Blue
         Write-Host "========================================" -ForegroundColor Blue
         Write-Host "   SmartShell v1.0 - Expressive Terminal" -ForegroundColor Blue
         Write-Host "========================================" -ForegroundColor Blue
-        Write-Host "Type 'help' for commands, 'exit' to quit" -ForegroundColor DarkGray
+        Write-Host "Type 'help' for commands, 'exit' to quit"-ForegroundColor DarkGray
         Write-Host ""
 
         while ($true) {

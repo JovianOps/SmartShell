@@ -1,7 +1,10 @@
 ﻿$OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-$DefaultLocation = "Palangkaraya"
+$DefaultLocation = $env:SMARTSHELL_WEATHER_LOCATION
+if (-not $DefaultLocation) {
+    $DefaultLocation = "auto"
+}
 
 $Emoji = @{
     ":)" = "😊"; ":(" = "😞"; ";)" = "😉"
@@ -57,8 +60,10 @@ function Get-NetworkInfo {
 
 function Get-Weather {
     param([string]$Location = "")
-    $loc = if ($Location) { $Location.Replace(' ','+') } else { $DefaultLocation.Replace(' ','+') }
-    $url = "https://wttr.in/$loc"
+    $loc = if ($Location) { $Location.Replace(' ','+') } else {
+        if ($DefaultLocation -eq "auto") { "" } else { $DefaultLocation.Replace(' ','+') }
+    }
+    $url = if ($loc) { "https://wttr.in/$loc" } else { "https://wttr.in" }
     try {
         $resp = curl.exe -s --max-time 5 --get "$url" --data-urlencode "format=3" 2>$null
         if ($resp) {
@@ -69,11 +74,6 @@ function Get-Weather {
     } catch {
         Write-Host "🌤️ Offline - weather data unavailable" -ForegroundColor DarkGray
     }
-}
-
-function Get-Timezone {
-    $tz = [System.TimeZoneInfo]::Local
-    Write-Host "🕒 Time: $(Get-Date -Format 'HH:mm:ss') ($($tz.DisplayName))" -ForegroundColor Green
 }
 
 function Get-CpuInfo {
