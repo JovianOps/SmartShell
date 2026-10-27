@@ -4,11 +4,21 @@ Expressive terminal for PowerShell 7.6.6+ with emoji reactions and smart command
 
 ## Install
 
+### Windows (PowerShell 7.6.6+)
+
 ```bat
 INSTALL_SMARTSHELL.bat
 ```
 
 Or manually copy `Modules/SmartShell/` to your PowerShell modules directory.
+
+### Any OS with Node.js
+
+```bash
+npx degit JovianOps/SmartShell
+```
+
+Then run `INSTALL_SMARTSHELL.bat` (Windows) or copy files manually (Linux/macOS — experimental).
 
 ## Usage
 
