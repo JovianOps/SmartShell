@@ -40,3 +40,8 @@ Type `exit` to quit.
 ## Security
 
 This module uses `Invoke-Expression` for the `calc` command. Only run trusted expressions.
+See [SECURITY.md](SECURITY.md) for details.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). **Linux/Ubuntu support is needed** — PRs welcome!
