@@ -51,6 +51,47 @@ function Get-NetworkInfo {
     Write-Host "🌐 IP: $ip" -ForegroundColor Cyan
 }
 
+function Get-Weather {
+    Write-Host "🌤️ Weather: Check https://wttr.in for current conditions" -ForegroundColor Blue
+}
+
+function Get-CpuInfo {
+    $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
+    Write-Host "📊 CPU: $($cpu.Name) @ $($cpu.MaxClockSpeed)MHz" -ForegroundColor Yellow
+}
+
+function Get-GpuInfo {
+    $gpu = Get-CimInstance Win32_VideoController | Select-Object -First 1
+    Write-Host "🎮 GPU: $($gpu.Name)" -ForegroundColor Magenta
+}
+
+function Get-ProcessList {
+    $procs = Get-Process | Sort-Object WS -Descending | Select-Object -First 10
+    foreach ($p in $procs) {
+        $mem = [math]::Round($p.WS / 1MB, 1)
+        Write-Host "  $($p.ProcessName) ($mem MB)" -ForegroundColor DarkGray
+    }
+}
+
+function Get-ListeningPorts {
+    netsh advfirewall firewall show rule name=all 2>$null | Out-Null
+    $ports = Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+        Select-Object LocalAddress, LocalPort
+    foreach ($p in $ports) {
+        Write-Host "  Listening: $($p.LocalAddress):$($p.LocalPort)" -ForegroundColor DarkGray
+    }
+}
+
+function Get-EnvInfo {
+    Write-Host "  Computer: $env:COMPUTERNAME" -ForegroundColor DarkGray
+    Write-Host "  User: $env:USERNAME" -ForegroundColor DarkGray
+    Write-Host "  OS: $env:OS" -ForegroundColor DarkGray
+}
+
+function Get-Whoami {
+    Write-Host "  You are: $env:USERNAME@$env:COMPUTERNAME" -ForegroundColor DarkGray
+}
+
 function Show-Expression {
     param([string]$Text)
     $lower = $Text.ToLower()
@@ -74,6 +115,15 @@ function Smart-Write {
         "^mem$" { Get-MemoryInfo }
         "^ip$" { Get-NetworkInfo }
         "^network$" { Get-NetworkInfo }
+        "^weather$" { Get-Weather }
+        "^cpu$" { Get-CpuInfo }
+        "^gpu$" { Get-GpuInfo }
+        "^processes$" { Get-ProcessList }
+        "^procs$" { Get-ProcessList }
+        "^listening$" { Get-ListeningPorts }
+        "^ports$" { Get-ListeningPorts }
+        "^env$" { Get-EnvInfo }
+        "^whoami$" { Get-Whoami }
         "^calc\s+(.+)$" {
             try {
                 $result = Invoke-Expression $matches[1]
@@ -91,6 +141,13 @@ Available commands:
   disk            - Show disk usage
   memory / mem    - Show RAM usage
   ip / network    - Show network IP
+  weather         - Show weather info
+  cpu             - Show CPU info
+  gpu             - Show GPU info
+  processes       - Show top 10 processes
+  listening       - Show listening ports
+  env             - Show environment info
+  whoami          - Show current user
   calc <expr>     - Calculate expression (e.g. calc 2*3+5)
   echo <message>  - Echo message (with emoji expressions)
   help            - Show this help
@@ -129,4 +186,4 @@ function Smartshell {
     }
 }
 
-Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Show-Expression
+Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Show-Expression
