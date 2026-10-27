@@ -21,8 +21,11 @@ with open(SCRATCH_PSD1, encoding="utf-8") as f:
     psd1 = f.read()
 
 def write_bom(path, content):
+    raw = content.encode("utf-8")
+    if raw[:3] != BOM:
+        raw = BOM + raw
     with open(path, "wb") as f:
-        f.write(BOM + content.encode("utf-8"))
+        f.write(raw)
 
 repo_psm1 = os.path.join(REPO_DIR, "SmartShell.psm1")
 repo_psd1 = os.path.join(REPO_DIR, "SmartShell.psd1")
