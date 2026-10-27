@@ -24,7 +24,7 @@ echo.
 echo I will show you how types of command works.
 echo smartshell memory shows you how much ram usage you have right now.
 echo smartshell calc shows you the answer to the expression question you have right now.
-echo smartshell echo shows you echo message and there might be some emojis(thats supposed to be there its good for yall
+echo smartshell echo shows you echo message and there might be some emojis(thats supposed to be there its good for yall)
 echo.
 echo Source: %MODULE_SRC%
 echo.
