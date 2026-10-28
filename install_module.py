@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Install SmartShell module files with BOM."""
-import os, shutil
+import os, shutil, codecs
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 SCRATCH_PSM1 = os.path.join(BASE, "scratch_psm1.txt")
 SCRATCH_PSD1 = os.path.join(BASE, "scratch_psd1.txt")
 
 REPO_DIR = os.path.join(BASE, "Modules", "SmartShell")
-PS_DIR = "D:/Athalla/Desktop/PowerShell-7.6.6-win-x64/Modules/SmartShell"
+PS_DIR = os.environ.get(
+    "SMARTSHELL_PS_INSTALL",
+    os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "PowerShell", "Modules", "SmartShell")
+) or os.path.join(os.path.dirname(BASE), "PowerShell-7.6.6-win-x64", "Modules", "SmartShell")
 SRC_PSM1 = os.path.join(BASE, "SmartShell.ps1")  # standalone mirror of .psm1
 
-BOM = b"\xef\xbb\xbf"
+BOM = codecs.BOM_UTF8
 
 os.makedirs(REPO_DIR, exist_ok=True)
 os.makedirs(PS_DIR, exist_ok=True)
