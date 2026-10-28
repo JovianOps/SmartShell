@@ -72,6 +72,10 @@ def main():
     if os.path.isdir(os.path.dirname(portable_path)):
         targets[os.path.join(portable_path, "SmartShell.psm1")] = psm1
         targets[os.path.join(portable_path, "SmartShell.psd1")] = psd1
+    # Also copy standalone .ps1 to portable pwsh directory
+    portable_ps1 = os.path.join(os.path.dirname(BASE), "PowerShell-7.6.6-win-x64", "SmartShell.ps1")
+    if os.path.isdir(os.path.dirname(portable_ps1)):
+        targets[portable_ps1] = standalone
 
     for path, content in targets.items():
         write_bom_utf8(path, content)
