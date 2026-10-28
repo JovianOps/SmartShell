@@ -83,6 +83,30 @@ function Get-NetworkInfo {
     }
 }
 
+function Get-InternetInfo {
+    try {
+        $publicIP = (curl.exe -s --max-time 5 https://api.ipify.org 2>$null).Trim()
+        if ($publicIP) {
+            Write-Host "🌍 Public IP: $publicIP" -ForegroundColor Cyan
+        } else {
+            Write-Host "🌍 Public IP: N/A (offline?)" -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Host "🌍 Public IP: N/A (offline?)" -ForegroundColor DarkGray
+    }
+    # Sample network interface bytes/sec over 0.5s
+    Get-Counter "\Network Interface(*)\Bytes Total/sec" -ErrorAction SilentlyContinue | Out-Null
+    Start-Sleep -Milliseconds 500
+    $net = Get-Counter "\Network Interface(*)\Bytes Total/sec" -ErrorAction SilentlyContinue
+    foreach ($s in $net.CounterSamples) {
+        $name = $s.InstanceName
+        $bps = [math]::Round($s.CookedValue, 0)
+        $down = if ($bps -gt 1MB) { "🔴 $(([math]::Round($bps/1MB, 1))) MB/s" } elseif ($bps -gt 1KB) { "🟡 $(([math]::Round($bps/1KB, 1))) KB/s" } else { "🟢 ${bps} B/s" }
+        $color = if ($bps -gt 1MB) { "Red" } elseif ($bps -gt 1KB) { "Yellow" } else { "Green" }
+        Write-Host "📈 ${name}: $down" -ForegroundColor $color
+    }
+}
+
 function Get-Weather {
     param([string]$Location = "")
     $loc = if ($Location) { $Location.Replace(' ','+') } else {
@@ -198,6 +222,7 @@ function Smart-Write {
         "^mem$" { Get-MemoryInfo }
         "^ip$" { Get-NetworkInfo }
         "^network$" { Get-NetworkInfo }
+        "^internet$" { Get-InternetInfo }
         "^weather\s+(.+)$" { Get-Weather -Location $matches[1] }
         "^weather$" { Get-Weather }
         "^cpu$" { Get-CpuInfo }
@@ -225,6 +250,7 @@ Available commands:
   disk            - Show disk usage
   memory / mem    - Show RAM usage
   ip / network    - Show network IP
+  internet        - Show public IP and bandwidth usage
   weather [location]  - Show weather (e.g. weather bromo)
   cpu             - Show CPU info
   gpu             - Show GPU info
