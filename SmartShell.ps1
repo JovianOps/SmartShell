@@ -219,6 +219,19 @@ function Get-Whoami {
     Write-Host "  You are: $env:USERNAME@$env:COMPUTERNAME" -ForegroundColor DarkGray
 }
 
+function Stop-ProcessPartial {
+    param([string]$Name)
+    $procs = Get-Process | Where-Object { $_.ProcessName -like "*$Name*" }
+    if (-not $procs) {
+        Write-Host "❌ No process found matching: $Name" -ForegroundColor Red
+        return
+    }
+    foreach ($p in $procs) {
+        Write-Host "🗑️ Stopping $($p.ProcessName) (PID: $($p.Id))" -ForegroundColor Yellow
+        Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Show-Expression {
     param([string]$Text)
     $lower = $Text.ToLower()
@@ -255,6 +268,7 @@ function Smart-Write {
         "^ports$" { Get-ListeningPorts }
         "^env$" { Get-EnvInfo }
         "^whoami$" { Get-Whoami }
+        "^close\s+(.+)$" { Stop-ProcessPartial -Name $matches[1] }
         "^calc\s+(.+)$" {
             try {
                 $result = Invoke-Expression $matches[1]
@@ -282,6 +296,7 @@ Available commands:
   whoami          - Show current user
   calc <expr>     - Calculate expression (e.g. calc 2*3+5)
   echo <message>  - Echo message (with emoji expressions)
+  close <name>    - Close process by partial name (e.g. close roblox)
   help            - Show this help
 '@ -ForegroundColor Cyan
         }

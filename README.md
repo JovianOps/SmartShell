@@ -40,7 +40,7 @@ smartshell whoami        # Show current user
 smartshell help          # Show all commands
 smartshell echo I am happy  # Echo with emoji reaction
 smartshell calc 2*3+5    # Calculate expression
-smartshell grrr          # 😠 angry reaction
+smartshell close <name>  # Close process by partial name (picks from matches)
 ```
 
 ### CPU Usage
