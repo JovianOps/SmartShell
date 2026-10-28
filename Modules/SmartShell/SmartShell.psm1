@@ -78,13 +78,27 @@ function Get-Weather {
 }
 
 function Get-CpuInfo {
-    $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
-    Write-Host "📊 CPU: $($cpu.Name) @ $($cpu.MaxClockSpeed)MHz" -ForegroundColor Yellow
+    Get-CimInstance Win32_PerfFormattedData_PerfProc_Process |
+        Where-Object { $_.Name -notmatch '_Total|Idle|_Global' -and $_.PercentProcessorTime -gt 0 } |
+        Sort-Object PercentProcessorTime -Descending |
+        Select-Object -First 5 Name, PercentProcessorTime |
+        ForEach-Object {
+            $emoji = if ($_.PercentProcessorTime -gt 50) { "🔴" } elseif ($_.PercentProcessorTime -gt 20) { "🟡" } else { "🟢" }
+            Write-Host "$emoji $($_.Name): $($_.PercentProcessorTime)%"
+        }
 }
 
 function Get-GpuInfo {
     $gpu = Get-CimInstance Win32_VideoController | Select-Object -First 1
-    Write-Host "🎮 GPU: $($gpu.Name)" -ForegroundColor Magenta
+    $load = $null
+    try { $load = (nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader 2>$null).Trim() } catch {}
+    if ($load -and $load -ne "0 %") {
+        $pct = [int]$load.Replace('%','').Trim()
+        $emoji = if ($pct -gt 75) { "🔴" } elseif ($pct -gt 40) { "🟡" } else { "🟢" }
+        Write-Host "🎮 GPU: $($gpu.Name) — Load: $emoji $load" -ForegroundColor Magenta
+    } else {
+        Write-Host "🎮 GPU: $($gpu.Name) — Load: 🟢 0%" -ForegroundColor Magenta
+    }
 }
 
 function Get-ProcessList {
