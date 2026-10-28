@@ -67,6 +67,11 @@ def main():
         os.path.join(PS_INSTALL, "SmartShell.psd1"): psd1,
         STANDALONE_PS1: standalone,
     }
+    # Also write to portable pwsh module path if it exists
+    portable_path = os.path.join(os.path.dirname(BASE), "PowerShell-7.6.6-win-x64", "Modules", "SmartShell")
+    if os.path.isdir(os.path.dirname(portable_path)):
+        targets[os.path.join(portable_path, "SmartShell.psm1")] = psm1
+        targets[os.path.join(portable_path, "SmartShell.psd1")] = psd1
 
     for path, content in targets.items():
         write_bom_utf8(path, content)

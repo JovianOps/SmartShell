@@ -19,7 +19,7 @@ $Emoji = @{
     "shy" = "😊"; "mad" = "😠"; "bored" = "😴"
     "excited" = "🤩"; "scared" = "😨"; "joking" = "😂"
     "facepalm" = "🤦"; "ok" = "👌"; "yes" = "👍"
-    "no" = "👎"; "hi" = "👋"; "bye" = "👋"; "grrr" = "😠"
+    "no" = "👎"; "hi" = "👋"; "bye" = "👋"
 }
 
 function Get-Time {
@@ -157,7 +157,7 @@ function Smart-Write {
             }
         }
         "^help$" {
-            $helpText = @"
+            Write-Host @'
 Available commands:
   time            - Show current time
   date            - Show today's date
@@ -165,7 +165,7 @@ Available commands:
   disk            - Show disk usage
   memory / mem    - Show RAM usage
   ip / network    - Show network IP
-  weather [location]  - Show weather (e.g. weather Bromo)
+  weather [location]  - Show weather (e.g. weather bromo)
   cpu             - Show CPU info
   gpu             - Show GPU info
   processes       - Show top 10 processes
@@ -175,8 +175,7 @@ Available commands:
   calc <expr>     - Calculate expression (e.g. calc 2*3+5)
   echo <message>  - Echo message (with emoji expressions)
   help            - Show this help
-"@
-            Write-Host $helpText -ForegroundColor Cyan
+'@ -ForegroundColor Cyan
         }
         "^echo\s+(.+)$" {
             Write-Host "  📝 $($matches[1])" -ForegroundColor White
@@ -195,6 +194,7 @@ function Smartshell {
     if ($InputScript) {
         Smart-Write -Line ($InputScript -join ' ').Trim()
     } else {
+        Write-Host "  Made by Athalla. All rights reserved. " -ForegroundColor DarkRed
         Write-Host "========================================" -ForegroundColor Blue
         Write-Host "   SmartShell v1.0 - Expressive Terminal" -ForegroundColor Blue
         Write-Host "========================================" -ForegroundColor Blue
