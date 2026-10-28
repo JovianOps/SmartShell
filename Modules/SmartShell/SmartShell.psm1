@@ -95,13 +95,20 @@ function Get-GpuInfo {
         try { $pct = (nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader 2>$null).Trim() } catch {}
     } elseif ($gpu.AdapterCompatibility -match "AMD|ATI") {
         try { $pct = (amd-smi metric gpu --json 2>$null | ConvertFrom-Json).gpu[0].gpu_utilization_percentage } catch {}
+    } elseif ($gpu.AdapterCompatibility -match "Intel") {
+        try {
+            $samples = Get-Counter "\GPU Engine(*)\Utilization Percentage" -ErrorAction Stop |
+                Select-Object -ExpandProperty CounterSamples |
+                Where-Object { $_.CookedValue -gt 0 }
+            if ($samples) { $pct = [int]($samples | Measure-Object -Property CookedValue -Average).Average }
+        } catch {}
     }
     if ($null -ne $pct) {
         $p = if ($pct -is [string]) { [int]$pct.Replace('%','').Trim() } else { [int]$pct }
         $emoji = if ($p -gt 75) { "🔴" } elseif ($p -gt 40) { "🟡" } else { "🟢" }
         Write-Host "🎮 GPU: $($gpu.Name) — Load: $emoji $p%" -ForegroundColor Magenta
     } else {
-        Write-Host "🎮 GPU: $($gpu.Name) — Load: N/A" -ForegroundColor Magenta
+        Write-Host "🎮 GPU: $($gpu.Name) — Load: N/A (vendor: $($gpu.AdapterCompatibility))" -ForegroundColor Magenta
     }
 }
 
