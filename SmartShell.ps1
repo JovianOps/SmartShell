@@ -91,14 +91,18 @@ function Get-CpuInfo {
 
 function Get-GpuInfo {
     $gpu = Get-CimInstance Win32_VideoController | Select-Object -First 1
-    $load = $null
-    try { $load = (nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader 2>$null).Trim() } catch {}
-    if ($load -and $load -ne "0 %") {
-        $pct = [int]$load.Replace('%','').Trim()
-        $emoji = if ($pct -gt 75) { "🔴" } elseif ($pct -gt 40) { "🟡" } else { "🟢" }
-        Write-Host "🎮 GPU: $($gpu.Name) — Load: $emoji $load" -ForegroundColor Magenta
+    $pct = $null
+    if ($gpu.AdapterCompatibility -match "NVIDIA") {
+        try { $pct = (nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader 2>$null).Trim() } catch {}
+    } elseif ($gpu.AdapterCompatibility -match "AMD|ATI") {
+        try { $pct = (amd-smi metric gpu --json 2>$null | ConvertFrom-Json).gpu[0].gpu_utilization_percentage } catch {}
+    }
+    if ($null -ne $pct) {
+        $p = if ($pct -is [string]) { [int]$pct.Replace('%','').Trim() } else { [int]$pct }
+        $emoji = if ($p -gt 75) { "🔴" } elseif ($p -gt 40) { "🟡" } else { "🟢" }
+        Write-Host "🎮 GPU: $($gpu.Name) — Load: $emoji $p%" -ForegroundColor Magenta
     } else {
-        Write-Host "🎮 GPU: $($gpu.Name) — Load: 🟢 0%" -ForegroundColor Magenta
+        Write-Host "🎮 GPU: $($gpu.Name) — Load: N/A" -ForegroundColor Magenta
     }
 }
 
