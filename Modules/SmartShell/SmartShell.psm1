@@ -218,6 +218,40 @@ function Get-Whoami {
     Write-Host "  You are: $env:USERNAME@$env:COMPUTERNAME" -ForegroundColor DarkGray
 }
 
+function Get-TempInfo {
+    # CPU temperature
+    try {
+        $cpuTemp = Get-CimInstance -Namespace "root/wmi" -ClassName "MSAcpi_ThermalZoneTemperature" -ErrorAction Stop | Select-Object -First 1
+        if ($cpuTemp) {
+            $t = [math]::Round($cpuTemp.CurrentTemperature / 10 - 273.15)
+            Write-Host "🌡️ CPU: $t°C" -ForegroundColor Yellow
+        }
+    } catch {}
+    # GPU temperature - NVIDIA
+    try {
+        $nv = (nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader 2>$null).Trim()
+        if ($nv) { Write-Host "🌡️ GPU: $nv°C" -ForegroundColor Yellow }
+    } catch {}
+    # GPU temperature - AMD
+    try {
+        $amd = (amd-smi metric temperature_gpu --json 2>$null | ConvertFrom-Json).gpu[0].temperature_gpu
+        if ($amd) { Write-Host "🌡️ GPU (AMD): $amd°C" -ForegroundColor Yellow }
+    } catch {}
+    # Disk temperatures via Get-PhysicalDisk
+    Get-PhysicalDisk | Where-Object { $_.MediaType -ne "Unknown" } | ForEach-Object {
+        $type = $_.MediaType
+        $emoji = if ($type -eq "SSD") { "💾" } elseif ($type -eq "HDD") { "📀" } else { "💿" }
+        try {
+            $temp = Get-StorageReliabilityCounter -PhysicalDisk $_ | Select-Object -ExpandProperty Temperature -ErrorAction SilentlyContinue
+            if ($temp) {
+                $t = [math]::Round($temp / 10)
+                $color = if ($t -gt 60) { "Red" } elseif ($t -gt 45) { "Yellow" } else { "Green" }
+                Write-Host "$emoji Disk ($type): $t°C" -ForegroundColor $color
+            }
+        } catch {}
+    }
+}
+
 function Stop-ProcessPartial {
     param([string]$Name)
     $procs = Get-Process | Where-Object { $_.ProcessName -like "*$Name*" }
@@ -252,6 +286,7 @@ function Smart-Write {
         "^date$" { Get-DateInfo }
         "^uptime$" { Get-Uptime }
         "^disk$" { Get-DiskInfo }
+        "^temp$" { Get-TempInfo }
         "^memory$" { Get-MemoryInfo }
         "^mem$" { Get-MemoryInfo }
         "^ip$" { Get-NetworkInfo }
@@ -283,6 +318,7 @@ Available commands:
   date            - Show today's date
   uptime          - Show system uptime
   disk            - Show disk usage
+  temp            - Show disk, CPU, GPU temperatures
   memory / mem    - Show RAM usage
   ip / network    - Show network IP
   internet        - Show public IP and bandwidth usage
@@ -334,4 +370,4 @@ function Smartshell {
     }
 }
 
-Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-InternetInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Stop-ProcessPartial, Show-Expression
+Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-TempInfo, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-InternetInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Stop-ProcessPartial, Show-Expression

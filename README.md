@@ -26,6 +26,7 @@ smartshell time          # Show current time
 smartshell date          # Show today's date
 smartshell uptime        # Show system uptime
 smartshell disk          # Show disk usage
+smartshell temp          # Show disk, CPU, GPU temperatures
 smartshell memory        # Show RAM usage
 smartshell ip            # Show local IP + bandwidth usage
 smartshell internet      # Show public IP + bandwidth usage
