@@ -71,6 +71,17 @@ function Get-MemoryInfo {
 function Get-NetworkInfo {
     $ip = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Ethernet","Wi-Fi" -ErrorAction SilentlyContinue).IPAddress
     Write-Host "🌐 IP: $ip" -ForegroundColor Cyan
+    # Sample network interface bytes/sec over 0.5s
+    Get-Counter "\Network Interface(*)\Bytes Total/sec" -ErrorAction SilentlyContinue | Out-Null
+    Start-Sleep -Milliseconds 500
+    $net = Get-Counter "\Network Interface(*)\Bytes Total/sec" -ErrorAction SilentlyContinue
+    foreach ($s in $net.CounterSamples) {
+        $name = $s.InstanceName
+        $bps = [math]::Round($s.CookedValue, 0)
+        $emoji = if ($bps -gt 1MB) { "🔴" } elseif ($bps -gt 100KB) { "🟡" } else { "🟢" }
+        $color = if ($bps -gt 1MB) { "Red" } elseif ($bps -gt 100KB) { "Yellow" } else { "Green" }
+        Write-Host "$emoji ${name}: $bps B/s" -ForegroundColor $color
+    }
 }
 
 function Get-Weather {
