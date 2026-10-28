@@ -242,7 +242,7 @@ function Get-TempInfo {
         $type = $_.MediaType
         $emoji = if ($type -eq "SSD") { "💾" } elseif ($type -eq "HDD") { "📀" } else { "💿" }
         try {
-            $temp = Get-StorageReliabilityCounter -PhysicalDisk $_ | Select-Object -ExpandProperty Temperature -ErrorAction SilentlyContinue
+            $temp = Get-StorageReliabilityCounter -PhysicalDisk $_ -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Temperature -ErrorAction SilentlyContinue
             if ($temp) {
                 $t = [math]::Round($temp / 10)
                 $color = if ($t -gt 60) { "Red" } elseif ($t -gt 45) { "Yellow" } else { "Green" }
