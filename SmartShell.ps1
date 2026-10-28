@@ -218,6 +218,7 @@ function Smartshell {
         while ($true) {
             Write-Host "✨ " -NoNewline -ForegroundColor Magenta
             $userInput = Read-Host
+            if ($null -eq $userInput) { break }
             if ($userInput -match "^exit$|^quit$") { break }
             Smart-Write -Line ($userInput.Trim())
         }
@@ -225,4 +226,4 @@ function Smartshell {
     }
 }
 
-if ($Args) { Smartshell ($Args -join ' ').Trim() }
+if ($Args) { Smartshell ($Args -join ' ').Trim() } else { Smartshell }

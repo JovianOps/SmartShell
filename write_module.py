@@ -55,7 +55,7 @@ def main():
     standalone_lines = []
     for line in lines:
         if line.strip().startswith("Export-ModuleMember"):
-            standalone_lines.append("if ($Args) { Smartshell ($Args -join ' ').Trim() }\n")
+            standalone_lines.append("if ($Args) { Smartshell ($Args -join ' ').Trim() } else { Smartshell }\n")
         else:
             standalone_lines.append(line)
     standalone = "param([Parameter(ValueFromRemainingArguments=$true)][string[]]$Args)\n" + "".join(standalone_lines)
