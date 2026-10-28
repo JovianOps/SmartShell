@@ -10,10 +10,11 @@ Usage:
     python write_module.py
 """
 import os
+import codecs
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
-# Source files in the repo (no BOM — readable by any tool)
+# Source files in the repo
 SRC_PSM1 = os.path.join(BASE, "Modules", "SmartShell", "SmartShell.psm1")
 SRC_PSD1 = os.path.join(BASE, "Modules", "SmartShell", "SmartShell.psd1")
 
@@ -23,14 +24,13 @@ PS_INSTALL = os.path.join(
     "PowerShell-7.6.6-win-x64", "Modules", "SmartShell"
 )
 
-# Mirror: standalone .ps1 that can be dot-sourced directly
 STANDALONE_PS1 = os.path.join(BASE, "SmartShell.ps1")
 
-BOM = b"\xef\xbb\xbf"
+BOM = codecs.BOM_UTF8
 
 
 def write_bom_utf8(path, content):
-    """Write content as UTF-8 with BOM, but avoid double-BOM if source already has one."""
+    """Write content as UTF-8 with BOM, avoiding double-BOM."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if isinstance(content, str):
         raw = content.encode("utf-8")
@@ -48,12 +48,23 @@ def main():
     with open(SRC_PSD1, encoding="utf-8") as f:
         psd1 = f.read()
 
+    # Standalone .ps1: param block FIRST, replace Export-ModuleMember line with invocation
+    psm1_stripped = psm1[1:] if psm1.startswith("﻿") else psm1
+    lines = psm1_stripped.splitlines(keepends=True)
+    standalone_lines = []
+    for line in lines:
+        if line.strip().startswith("Export-ModuleMember"):
+            standalone_lines.append("if ($Args) { Smartshell ($Args -join ' ').Trim() }\n")
+        else:
+            standalone_lines.append(line)
+    standalone = "param([Parameter(ValueFromRemainingArguments=$true)][string[]]$Args)\n" + "".join(standalone_lines)
+
     targets = {
         SRC_PSM1: psm1,
         SRC_PSD1: psd1,
         os.path.join(PS_INSTALL, "SmartShell.psm1"): psm1,
         os.path.join(PS_INSTALL, "SmartShell.psd1"): psd1,
-        STANDALONE_PS1: psm1,
+        STANDALONE_PS1: standalone,
     }
 
     for path, content in targets.items():

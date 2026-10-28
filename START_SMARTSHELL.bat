@@ -1,2 +1,2 @@
 @echo off
-PowerShell -NoProfile -ExecutionPolicy Bypass -File "%~dp0SmartShell.ps1"
+D:\Athalla\Desktop\PowerShell-7.6.6-win-x64\pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0SmartShell.ps1" %*

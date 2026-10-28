@@ -1,4 +1,5 @@
-﻿$OutputEncoding = [System.Text.Encoding]::UTF8
+﻿param([Parameter(ValueFromRemainingArguments=$true)][string[]]$Args)
+$OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $DefaultLocation = $env:SMARTSHELL_WEATHER_LOCATION
@@ -210,4 +211,4 @@ function Smartshell {
     }
 }
 
-Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Show-Expression
+if ($Args) { Smartshell ($Args -join ' ').Trim() }
