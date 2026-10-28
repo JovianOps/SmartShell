@@ -21,6 +21,19 @@ $Emoji = @{
     "no" = "👎"; "hi" = "👋"; "bye" = "👋"; "seesh" = "🥶"
 }
 
+$EmojiColor = @{
+    "😊" = "Yellow"; "😞" = "DarkGray"; "😉" = "Yellow"
+    "❤️" = "Red"; "😮" = "Yellow"; "😛" = "Yellow"
+    "😠" = "Red"; "😄" = "Yellow"; "😢" = "Blue"
+    "🤔" = "Yellow"; "😎" = "Cyan"; "😕" = "Yellow"
+    "😍" = "Red"; "😩" = "Blue"; "😱" = "Red"
+    "🥰" = "Magenta"; "😭" = "Blue"; "🤯" = "Yellow"
+    "😴" = "DarkGray"; "🤩" = "Yellow"; "😨" = "Blue"
+    "😂" = "Yellow"; "🤦" = "Yellow"; "👌" = "Green"
+    "👍" = "Green"; "👎" = "Red"; "👋" = "Cyan"
+    "🥶" = "Blue"
+}
+
 function Get-Time {
     $tz = [System.TimeZoneInfo]::Local
     $now = Get-Date
@@ -148,7 +161,9 @@ function Show-Expression {
     $lower = $Text.ToLower()
     foreach ($key in $Emoji.Keys) {
         if ($lower.Contains($key.ToLower())) {
-            Write-Host "  ─ $($Emoji[$key])" -ForegroundColor Yellow
+            $e = $Emoji[$key]
+            $c = if ($EmojiColor.ContainsKey($e)) { $EmojiColor[$e] } else { "Yellow" }
+            Write-Host "  ─ $e" -ForegroundColor $c
             return
         }
     }
