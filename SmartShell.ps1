@@ -253,6 +253,69 @@ function Get-TempInfo {
     }
 }
 
+function Get-SystemInfo {
+    $hasBattery = $false
+    try {
+        $batt = Get-CimInstance -ClassName Win32_Battery -ErrorAction Stop | Select-Object -First 1 -ErrorAction SilentlyContinue
+        if ($batt) { $hasBattery = $true }
+    } catch {}
+    $line = @()
+    # CPU
+    try {
+        $cpu = Get-CimInstance -ClassName Win32_Processor | Select-Object -First 1
+        $cpuName = $cpu.Name -replace '^\s+', ''
+        $cpuLoad = $cpu.LoadPercentage
+        $cpuColor = if ($cpuLoad -gt 50) { "Red" } elseif ($cpuLoad -gt 20) { "Yellow" } else { "Green" }
+        $cpuBar = switch ($cpuColor) { "Red" { "🔴" }; "Yellow" { "🟡" }; "Green" { "🟢" } }
+        $line += "📊 CPU: $cpuName  $cpuBar $cpuLoad%"
+    } catch {}
+    # GPU
+    try {
+        $nv = cmd /c nvidia-smi --query-gpu=utilization.gpu,temperature.gpu --format=csv,noheader 2>$null | Out-String
+        $nv = $nv.Trim()
+        if ($nv) {
+            $parts = $nv -split ','
+            $gpuLoad = $parts[0].Trim().TrimEnd('%').Trim()
+            $gpuTemp = $parts[1].Trim()
+            $gpuColor = if ([int]$gpuLoad -gt 50) { "Red" } elseif ([int]$gpuLoad -gt 20) { "Yellow" } else { "Green" }
+            $gpuBar = switch ($gpuColor) { "Red" { "🔴" }; "Yellow" { "🟡" }; "Green" { "🟢" } }
+            $gpuName = (cmd /c nvidia-smi --query-gpu=name --format=csv,noheader 2>$null | Out-String).Trim()
+            $line += "🎮 GPU: $gpuName  $gpuBar $gpuLoad% | $gpuTemp°C"
+        }
+    } catch {}
+    # RAM
+    try {
+        $mem = Get-CimInstance -ClassName Win32_OperatingSystem
+        $used = [math]::Round(($mem.TotalVisibleMemorySize - $mem.FreePhysicalMemory) / 1MB, 1)
+        $total = [math]::Round($mem.TotalVisibleMemorySize / 1MB, 1)
+        $pct = [math]::Round($used / $total * 100)
+        $memColor = if ($pct -gt 80) { "Red" } elseif ($pct -gt 60) { "Yellow" } else { "Green" }
+        $memBar = switch ($memColor) { "Red" { "🔴" }; "Yellow" { "🟡" }; "Green" { "🟢" } }
+        $line += "🧠 RAM: $used/$total GB  $memBar $pct%"
+    } catch {}
+    # Disk
+    try {
+        $disk = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" | Select-Object -First 1
+        $usedGB = [math]::Round(($disk.Size - $disk.FreeSpace) / 1GB, 1)
+        $totalGB = [math]::Round($disk.Size / 1GB, 1)
+        $pct = [math]::Round(($disk.Size - $disk.FreeSpace) / $disk.Size * 100)
+        $diskColor = if ($pct -gt 80) { "Red" } elseif ($pct -gt 60) { "Yellow" } else { "Green" }
+        $diskBar = switch ($diskColor) { "Red" { "🔴" }; "Yellow" { "🟡" }; "Green" { "🟢" } }
+        $line += "💾 Disk: $usedGB/$totalGB GB  $diskBar $pct%"
+    } catch {}
+    # Battery
+    if ($hasBattery) {
+        $batt = Get-CimInstance -ClassName Win32_Battery | Select-Object -First 1
+        $battPct = $batt.EstimatedChargeRemaining
+        $status = if ($batt.BatteryStatus -eq 2) { "⚡ charging" } else { "🔋 discharging" }
+        $battColor = if ($battPct -lt 20) { "Red" } elseif ($battPct -lt 50) { "Yellow" } else { "Green" }
+        $line += "🔋 Battery: $battPct%  $status"
+    }
+    Write-Host ""
+    $line | ForEach-Object { Write-Host $_ }
+    Write-Host ""
+}
+
 function Stop-ProcessPartial {
     param([string]$Name)
     $procs = Get-Process | Where-Object { $_.ProcessName -like "*$Name*" }
@@ -288,6 +351,7 @@ function Smart-Write {
         "^uptime$" { Get-Uptime }
         "^disk$" { Get-DiskInfo }
         "^temp$" { Get-TempInfo }
+        "^system$" { Get-SystemInfo }
         "^memory$" { Get-MemoryInfo }
         "^mem$" { Get-MemoryInfo }
         "^ip$" { Get-NetworkInfo }
@@ -320,6 +384,7 @@ Available commands:
   uptime          - Show system uptime
   disk            - Show disk usage
   temp            - Show disk, CPU, GPU temperatures
+  system          - Show system overview (CPU, GPU, RAM, disk, battery)
   memory / mem    - Show RAM usage
   ip / network    - Show network IP
   internet        - Show public IP and bandwidth usage

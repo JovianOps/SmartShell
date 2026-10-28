@@ -27,6 +27,7 @@ smartshell date          # Show today's date
 smartshell uptime        # Show system uptime
 smartshell disk          # Show disk usage
 smartshell temp          # Show disk, CPU, GPU temperatures
+smartshell system        # Show system overview (CPU, GPU, RAM, disk, battery)
 smartshell memory        # Show RAM usage
 smartshell ip            # Show local IP + bandwidth usage
 smartshell internet      # Show public IP + bandwidth usage
@@ -74,6 +75,23 @@ Both use `Get-Counter "\Network Interface(*)\Bytes Total/sec"` with 500ms sampli
 - 🟡 over 1 KB/s — moderate traffic
 - 🔴 over 1 MB/s — high traffic
 
+### System Overview
+
+The `system` command shows a one-line overview of your entire machine:
+
+```
+🟢 CPU: AMD Ryzen 5 3600  🟢 14%
+🟡 GPU: NVIDIA GeForce GTX 1650  🟡 47% | 63.30°C
+🧠 RAM: 7.3/15.9 GB  🟢 46%
+💾 Disk: 213.1/237.4 GB  🔴 90%
+```
+
+- CPU: model + load percentage with color emoji (🔴 >50%, 🟡 >20%, 🟢 below)
+- GPU: model + load + temperature (NVIDIA via `nvidia-smi`, AMD via `amd-smi`)
+- RAM: used/total with color emoji
+- Disk: used/total with color emoji (🔴 >80%, 🟡 >60%, 🟢 below)
+- Battery: percentage + charging/discharging (only on laptops)
+
 ### Temperature
 
 The `temp` command shows system temperatures:
@@ -84,7 +102,7 @@ The `temp` command shows system temperatures:
 
 Color-coded disk indicators:
 - 🟢 below 45°C — cool
-- 🟡 above 45°C — warm
+- 🟡 above 45°C — warm  
 - 🔴 above 60°C — hot
 
 ## REPL Mode
