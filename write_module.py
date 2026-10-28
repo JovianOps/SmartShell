@@ -18,11 +18,12 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 SRC_PSM1 = os.path.join(BASE, "Modules", "SmartShell", "SmartShell.psm1")
 SRC_PSD1 = os.path.join(BASE, "Modules", "SmartShell", "SmartShell.psd1")
 
-# Installed module path for PowerShell 7.6.6
-PS_INSTALL = os.path.join(
-    os.path.dirname(BASE),
-    "PowerShell-7.6.6-win-x64", "Modules", "SmartShell"
-)
+# Installed module path — uses SMARTSHELL_PS_INSTALL env var if set,
+# otherwise defaults to LOCALAPPDATA\Microsoft\PowerShell\Modules\SmartShell
+PS_INSTALL = os.environ.get(
+    "SMARTSHELL_PS_INSTALL",
+    os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "PowerShell", "Modules", "SmartShell")
+) or os.path.join(os.path.dirname(BASE), "PowerShell-7.6.6-win-x64", "Modules", "SmartShell")
 
 STANDALONE_PS1 = os.path.join(BASE, "SmartShell.ps1")
 
