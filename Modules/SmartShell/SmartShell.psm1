@@ -91,16 +91,22 @@ function Get-Weather {
 }
 
 function Get-CpuInfo {
-    Get-CimInstance Win32_PerfFormattedData_PerfProc_Process |
-        Where-Object { $_.Name -notmatch '_Total|Idle|_Global' -and $_.PercentProcessorTime -gt 0 } |
-        Sort-Object PercentProcessorTime -Descending |
-        Select-Object -First 5 Name, PercentProcessorTime |
-        ForEach-Object {
-            $pct = $_.PercentProcessorTime
-            $emoji = if ($pct -gt 50) { "🔴" } elseif ($pct -gt 20) { "🟡" } else { "🟢" }
-            $color = if ($pct -gt 50) { "Red" } elseif ($pct -gt 20) { "Yellow" } else { "Green" }
-            Write-Host "$emoji $($_.Name): $($pct)%" -ForegroundColor $color
-        }
+    # Use Get-Counter for real-time process CPU (matches Task Manager)
+    Get-Counter "\Process(*)\% Processor Time" -ErrorAction SilentlyContinue | Out-Null
+    Start-Sleep -Milliseconds 500
+    $second = Get-Counter "\Process(*)\% Processor Time" -ErrorAction SilentlyContinue
+    $procs = $second.CounterSamples |
+        Where-Object { $_.InstanceName -notmatch '_Total|Idle|_Global' } |
+        ForEach-Object { [PSCustomObject]@{ Name = $_.InstanceName; CPU = [math]::Round($_.CookedValue, 0) } } |
+        Where-Object { $_.CPU -gt 0 } |
+        Sort-Object CPU -Descending |
+        Select-Object -First 5
+    foreach ($p in $procs) {
+        $pct = $p.CPU
+        $emoji = if ($pct -gt 50) { "🔴" } elseif ($pct -gt 20) { "🟡" } else { "🟢" }
+        $color = if ($pct -gt 50) { "Red" } elseif ($pct -gt 20) { "Yellow" } else { "Green" }
+        Write-Host "$emoji $($p.Name): $($pct)%" -ForegroundColor $color
+    }
 }
 
 function Get-GpuInfo {
