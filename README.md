@@ -74,6 +74,19 @@ Both use `Get-Counter "\Network Interface(*)\Bytes Total/sec"` with 500ms sampli
 - 🟡 over 1 KB/s — moderate traffic
 - 🔴 over 1 MB/s — high traffic
 
+### Temperature
+
+The `temp` command shows system temperatures:
+
+- **GPU**: via `nvidia-smi` (NVIDIA) or `amd-smi` (AMD)
+- **Disks**: via `Get-PhysicalDisk` with `Get-StorageReliabilityCounter` (SSD/HDD/NVMe)
+- **CPU**: via `MSAcpi_ThermalZoneTemperature` (ACPI — availability depends on motherboard/BIOS)
+
+Color-coded disk indicators:
+- 🟢 below 45°C — cool
+- 🟡 above 45°C — warm
+- 🔴 above 60°C — hot
+
 ## REPL Mode
 
 ```powershell
