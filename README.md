@@ -27,7 +27,9 @@ smartshell date          # Show today's date
 smartshell uptime        # Show system uptime
 smartshell disk          # Show disk usage
 smartshell memory        # Show RAM usage
-smartshell ip            # Show network IP
+smartshell ip            # Show local IP + bandwidth usage
+smartshell internet      # Show public IP + bandwidth usage
+smartshell network       # Alias for ip
 smartshell weather [city] # Show weather (e.g. smartshell weather bromo)
 smartshell cpu           # Show top processes by CPU usage (with color emoji)
 smartshell gpu           # Show GPU load (NVIDIA/AMD via vendor tools)
@@ -45,9 +47,9 @@ smartshell grrr          # 😠 angry reaction
 
 The `cpu` command shows the top 5 processes by CPU usage with color-coded indicators:
 
-- 🔴 75%+ — high usage
-- 🟡 40–74% — moderate usage
-- 🟢 below 40% — low usage
+- 🔴 50%+ — high usage
+- 🟡 20–49% — moderate usage
+- 🟢 below 20% — low usage
 
 ### GPU Load
 
@@ -55,9 +57,21 @@ The `gpu` command shows real-time GPU utilization. Detection is vendor-aware:
 
 - **NVIDIA**: uses `nvidia-smi` (requires NVIDIA drivers installed)
 - **AMD**: uses `amd-smi` (requires AMD software stack)
+- **Intel**: uses `Get-Counter` Windows performance counters
 - **Other**: shows `N/A` if no supported vendor tool is available
 
 Color-coded indicators match CPU (🔴/🟡/🟢).
+
+### Network Usage
+
+The `ip` command shows your local IPv4 address and per-interface bandwidth (bytes/sec).
+The `internet` command additionally shows your public IP via ipify.org.
+
+Both use `Get-Counter "\Network Interface(*)\Bytes Total/sec"` with 500ms sampling for real-time values:
+
+- 🟢 under 1 KB/s — low traffic
+- 🟡 over 1 KB/s — moderate traffic
+- 🔴 over 1 MB/s — high traffic
 
 ## REPL Mode
 
