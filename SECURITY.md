@@ -5,8 +5,8 @@
 We take security seriously. If you find a vulnerability in SmartShell, please report it responsibly:
 
 - **Do NOT open a public issue**
-- Email: `security@jovianops.dev` (if available) or open a private GitHub security advisory at https://github.com/JovianOps/SmartShell/security/advisories
-
+- Message @athallajovian in Telegram or DM sg2terompet_35750 in Discord
+  
 We will respond within 48 hours and work with you to address the issue.
 
 ## Known Risks
