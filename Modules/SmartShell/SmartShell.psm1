@@ -220,7 +220,7 @@ function Smartshell {
     } else {
         Write-Host "  Made by Athalla. All rights reserved. " -ForegroundColor DarkRed
         Write-Host "========================================" -ForegroundColor Blue
-        Write-Host "   SmartShell v1.0 - Expressive Terminal" -ForegroundColor Blue
+        Write-Host "   SmartShell v1.1.0 - Expressive Terminal" -ForegroundColor Blue
         Write-Host "========================================" -ForegroundColor Blue
         Write-Host "Type 'help' for commands, 'exit' to quit" -ForegroundColor DarkGray
         Write-Host ""
