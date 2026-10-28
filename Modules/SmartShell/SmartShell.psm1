@@ -6,6 +6,26 @@ if (-not $DefaultLocation) {
     $DefaultLocation = "auto"
 }
 
+# Derive default weather location from Windows timezone when set to "auto"
+function Get-DefaultLocation {
+    if ($DefaultLocation -ne "auto") { return $DefaultLocation }
+    $tz = [System.TimeZoneInfo]::Local.StandardName
+    switch -Wildcard ($tz) {
+        "*SE Asia*" { return "Palangkaraya" }
+        "*India*" { return "New Delhi" }
+        "*China*" { return "Beijing" }
+        "*Japan*" { return "Tokyo" }
+        "*Korea*" { return "Seoul" }
+        "*Eastern Standard*" { return "New York" }
+        "*Pacific Standard*" { return "Los Angeles" }
+        "*Central Standard*" { return "Chicago" }
+        "*Mountain Standard*" { return "Denver" }
+        "*GMT Standard*" { return "London" }
+        "*W. Europe*" { return "Berlin" }
+        default { return "" }
+    }
+}
+
 # Emoji expressions
 $Emoji = @{
     ":)" = "😊"; ":(" = "😞"; ";)" = "😉"
@@ -110,7 +130,8 @@ function Get-InternetInfo {
 function Get-Weather {
     param([string]$Location = "")
     $loc = if ($Location) { $Location.Replace(' ','+') } else {
-        if ($DefaultLocation -eq "auto") { "" } else { $DefaultLocation.Replace(' ','+') }
+        $default = Get-DefaultLocation
+        if ($default) { $default.Replace(' ','+') } else { "" }
     }
     $url = if ($loc) { "https://wttr.in/$loc" } else { "https://wttr.in" }
     try {
