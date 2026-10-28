@@ -19,7 +19,7 @@ $Emoji = @{
     "shy" = "😊"; "mad" = "😠"; "bored" = "😴"
     "excited" = "🤩"; "scared" = "😨"; "joking" = "😂"
     "facepalm" = "🤦"; "ok" = "👌"; "yes" = "👍"
-    "no" = "👎"; "hi" = "👋"; "bye" = "👋"
+    "no" = "👎"; "hi" = "👋"; "bye" = "👋"; "grrr" = "😠"
 }
 
 function Get-Time {
