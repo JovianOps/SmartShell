@@ -84,8 +84,10 @@ function Get-CpuInfo {
         Sort-Object PercentProcessorTime -Descending |
         Select-Object -First 5 Name, PercentProcessorTime |
         ForEach-Object {
-            $emoji = if ($_.PercentProcessorTime -gt 50) { "🔴" } elseif ($_.PercentProcessorTime -gt 20) { "🟡" } else { "🟢" }
-            Write-Host "$emoji $($_.Name): $($_.PercentProcessorTime)%"
+            $pct = $_.PercentProcessorTime
+            $emoji = if ($pct -gt 50) { "🔴" } elseif ($pct -gt 20) { "🟡" } else { "🟢" }
+            $color = if ($pct -gt 50) { "Red" } elseif ($pct -gt 20) { "Yellow" } else { "Green" }
+            Write-Host "$emoji $($_.Name): $($pct)%" -ForegroundColor $color
         }
 }
 
@@ -107,7 +109,9 @@ function Get-GpuInfo {
     if ($null -ne $pct) {
         $p = if ($pct -is [string]) { [int]$pct.Replace('%','').Trim() } else { [int]$pct }
         $emoji = if ($p -gt 75) { "🔴" } elseif ($p -gt 40) { "🟡" } else { "🟢" }
-        Write-Host "🎮 GPU: $($gpu.Name) — Load: $emoji $p%" -ForegroundColor Magenta
+        $color = if ($p -gt 75) { "Red" } elseif ($p -gt 40) { "Yellow" } else { "Green" }
+        Write-Host "🎮 GPU: $($gpu.Name) — Load: " -NoNewline -ForegroundColor Magenta
+        Write-Host "$emoji $p%" -ForegroundColor $color
     } else {
         Write-Host "🎮 GPU: $($gpu.Name) — Load: N/A (vendor: $($gpu.AdapterCompatibility))" -ForegroundColor Magenta
     }
