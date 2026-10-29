@@ -324,6 +324,10 @@ function Invoke-Snake {
     # Gateway invocations via cmd /c get a real console but redirected stdin,
     # so [Console]::KeyAvailable throws. Test actual console I/O availability.
     if ($Host.Name -ne 'ConsoleHost' -or [Environment]::UserInteractive -eq $false) { return }
+    if ([Console]::IsInputRedirected -or [Console]::IsOutputRedirected) {
+        Write-Host "Snake requires an interactive console (not redirected). Use a real terminal." -ForegroundColor Yellow
+        return
+    }
     try { $null = [Console]::KeyAvailable } catch { return }
 
     $width = 40
