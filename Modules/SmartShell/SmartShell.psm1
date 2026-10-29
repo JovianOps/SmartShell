@@ -347,23 +347,12 @@ function Invoke-Snake {
 
     # Place initial food
     $food = PlaceFood($snake, $width, $height, $rng)
-
-    # Save and clear the console
-    $origBg = [Console]::BackgroundColor
-    $origFg = [Console]::ForegroundColor
-    [Console]::CursorVisible = $false
-    # Guard: if we can't resize the console buffer, the game grid math breaks.
-    # Non-functional consoles (redirected, constrained) must bail before the loop.
+    # Buffer resize is optional for Write-Output rendering — proceed without it
+    # if it fails (PTY, redirected, constrained console all still work via Write-Output)
     try {
         [Console]::BufferHeight = $height + 3
         [Console]::BufferWidth = $width + 2
-        [Console]::WindowHeight = $height + 3
-        [Console]::WindowWidth = $width + 2
-    } catch {
-        # Console can't be resized — non-interactive or constrained buffer.
-        [Console]::CursorVisible = $true
-        return
-    }
+    } catch { }
 
     try {
         while ($true) {
@@ -387,8 +376,7 @@ function Invoke-Snake {
             # Check self-collision
             for ($i = 1; $i -lt $snake.Count; $i++) {
                 if ($snake[$i].Item1 -eq $nx -and $snake[$i].Item2 -eq $ny) {
-                    [Console]::SetCursorPosition(0, $height + 1)
-                    Write-Host "  Game Over! Score: $score" -ForegroundColor Red
+                    Write-Output "  Game Over! Score: $score"
                     return
                 }
             }
@@ -400,8 +388,7 @@ function Invoke-Snake {
             if ($nx -eq $food.Item1 -and $ny -eq $food.Item2) {
                 $score++
                 if ($snake.Count -gt ($width * $height - 1)) {
-                    [Console]::SetCursorPosition(0, $height + 1)
-                    Write-Host "  You win! Score: $score" -ForegroundColor Green
+                    Write-Output "  You win! Score: $score"
                     return
                 }
                 $food = PlaceFood($snake, $width, $height, $rng)
@@ -410,36 +397,36 @@ function Invoke-Snake {
                 $snake.RemoveAt($snake.Count - 1)
             }
 
-            # Draw
-            [Console]::SetCursorPosition(0, 0)
-            $sb = New-Object System.Text.StringBuilder
+            # Draw — use Write-Output for PTY/gateway compatibility
+            # ponytail: [Console]::SetCursorPosition+Write works in real TTY but
+            # invisible in PTY/redirected contexts (gateway capture misses it).
+            # Write-Output to stdout works everywhere. Clear-then-print each frame.
+            $frameLines = @()
             for ($y = 0; $y -lt $height; $y++) {
+                $row = ""
                 for ($x = 0; $x -lt $width; $x++) {
                     if ($x -eq $food.Item1 -and $y -eq $food.Item2) {
-                        $sb.Append("@") | Out-Null
+                        $row += "@"
                     } elseif ($x -eq $snake[0].Item1 -and $y -eq $snake[0].Item2) {
-                        $sb.Append("O") | Out-Null
+                        $row += "O"
                     } elseif ($snake | Where-Object { $_.Item1 -eq $x -and $_.Item2 -eq $y }) {
-                        $sb.Append("o") | Out-Null
+                        $row += "o"
                     } else {
-                        $sb.Append(" ") | Out-Null
+                        $row += " "
                     }
                 }
-                $sb.AppendLine() | Out-Null
+                $frameLines += $row
             }
-            # Score line below the grid
-            $sb.AppendLine("Score: $score") | Out-Null
-            [Console]::Write($sb.ToString())
+            $frameLines += "Score: $score"
+            $frameLines += ""
+            Write-Output ($frameLines -join [Environment]::NewLine)
 
             # Speed increases: faster as score rises
             $delay = [math]::Max(50, $speed - ($score * 5))
             Start-Sleep -Milliseconds $delay
         }
     } finally {
-        [Console]::SetCursorPosition(0, 0)
-        [Console]::CursorVisible = $true
-        [Console]::BackgroundColor = $origBg
-        [Console]::ForegroundColor = $origFg
+        try { [Console]::CursorVisible = $true } catch { }
     }
 }
 
