@@ -356,16 +356,20 @@ function Invoke-Snake {
 
     try {
         while ($true) {
-            # Handle input without blocking
-            if ([Console]::KeyAvailable) {
-                $key = [Console]::ReadKey($true).Key
-                switch ($key) {
-                    UpArrow    { if ($dir -ne 1) { $dir = 3 } }
-                    DownArrow  { if ($dir -ne 3) { $dir = 1 } }
-                    LeftArrow  { if ($dir -ne 0) { $dir = 2 } }
-                    RightArrow { if ($dir -ne 2) { $dir = 0 } }
-                    Escape     { return }
-                }
+            # Handle input without blocking — guard against PTY redirected input
+            if (-not [Console]::IsInputRedirected) {
+                try {
+                    if ([Console]::KeyAvailable) {
+                        $key = [Console]::ReadKey($true).Key
+                        switch ($key) {
+                            UpArrow    { if ($dir -ne 1) { $dir = 3 } }
+                            DownArrow  { if ($dir -ne 3) { $dir = 1 } }
+                            LeftArrow  { if ($dir -ne 0) { $dir = 2 } }
+                            RightArrow { if ($dir -ne 2) { $dir = 0 } }
+                            Escape     { return }
+                        }
+                    }
+                } catch { }
             }
 
             # Move head
@@ -397,10 +401,9 @@ function Invoke-Snake {
                 $snake.RemoveAt($snake.Count - 1)
             }
 
-            # Draw — use Write-Output for PTY/gateway compatibility
-            # ponytail: [Console]::SetCursorPosition+Write works in real TTY but
-            # invisible in PTY/redirected contexts (gateway capture misses it).
-            # Write-Output to stdout works everywhere. Clear-then-print each frame.
+            # Draw — ANSI escape for PTY/streaming compatibility
+            # \e[H = cursor home, \e[J = clear screen from cursor
+            # Works in PTY, real TTY, and gateway capture
             $frameLines = @()
             for ($y = 0; $y -lt $height; $y++) {
                 $row = ""
@@ -418,8 +421,7 @@ function Invoke-Snake {
                 $frameLines += $row
             }
             $frameLines += "Score: $score"
-            $frameLines += ""
-            Write-Output ($frameLines -join [Environment]::NewLine)
+            Write-Output ("`e[H`e[J" + ($frameLines -join [Environment]::NewLine))
 
             # Speed increases: faster as score rises
             $delay = [math]::Max(50, $speed - ($score * 5))
