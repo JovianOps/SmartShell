@@ -6,6 +6,23 @@ if (-not $DefaultLocation) {
     $DefaultLocation = "auto"
 }
 
+# Helper: check if a command exists (from CTT profile pattern)
+function Test-Command {
+    param([Parameter(Mandatory)][string]$Name)
+    $null -ne (Get-Command -Name $Name -ErrorAction SilentlyContinue)
+}
+
+# Helper: check if running in a real interactive console (from CTT profile pattern)
+function Test-InteractiveShell {
+    try {
+        return $Host.Name -eq 'ConsoleHost' -and
+            -not [Console]::IsInputRedirected -and
+            -not [Console]::IsOutputRedirected
+    } catch {
+        return $false
+    }
+}
+
 # Derive default weather location from Windows timezone when set to "auto"
 function Get-DefaultLocation {
     if ($DefaultLocation -ne "auto") { return $DefaultLocation }
@@ -320,15 +337,10 @@ function Invoke-Snake {
     # Uses ASCII chars for consistent console width (emoji are 2-col, breaks grid math).
 
     # Guard: refuse to run without a real interactive console
-    # ponytail: $Host.Name=ConsoleHost + UserInteractive=$true is insufficient —
-    # Gateway invocations via cmd /c get a real console but redirected stdin,
-    # so [Console]::KeyAvailable throws. Test actual console I/O availability.
-    if ([Console]::IsInputRedirected -or [Console]::IsOutputRedirected) {
+    if (-not (Test-InteractiveShell)) {
         Write-Output "Snake requires an interactive console (not redirected). Use a real terminal."
         return
     }
-    if ($Host.Name -ne 'ConsoleHost' -or [Environment]::UserInteractive -eq $false) { return }
-    try { $null = [Console]::KeyAvailable } catch { return }
 
     $width = 40
     $height = 20
@@ -563,4 +575,4 @@ function Smartshell {
     }
 }
 
-Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-TempInfo, Get-SystemInfo, Invoke-Snake, PlaceFood, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-InternetInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Stop-ProcessPartial, Show-Expression
+Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-TempInfo, Get-SystemInfo, Invoke-Snake, PlaceFood, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-InternetInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Stop-ProcessPartial, Show-Expression, Test-Command, Test-InteractiveShell
