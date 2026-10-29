@@ -318,6 +318,10 @@ function Get-SystemInfo {
 function Invoke-Snake {
     # ponytail: no AI, no win condition — play until you die. Restart by typing 'snake' again.
     # Uses ASCII chars for consistent console width (emoji are 2-col, breaks grid math).
+
+    # Guard: refuse to run without a real interactive console
+    if ($Host.Name -ne 'ConsoleHost' -or [Environment]::UserInteractive -eq $false) { return }
+
     $width = 40
     $height = 20
     $speed = 150  # ms between frames; decreases as score rises
@@ -331,6 +335,7 @@ function Invoke-Snake {
     $snake = [System.Collections.Generic.List[Tuple[int,int]]]::new()
     $snake.Add([Tuple[int,int]]::new([int]($width/2), [int]($height/2)))
     $rng = [System.Random]::new()
+    if (-not $rng) { return }
 
     # Place initial food
     $food = PlaceFood($snake, $width, $height, $rng)
