@@ -348,10 +348,18 @@ function Invoke-Snake {
     $origBg = [Console]::BackgroundColor
     $origFg = [Console]::ForegroundColor
     [Console]::CursorVisible = $false
-    [Console]::BufferHeight = $height + 3
-    [Console]::BufferWidth = $width + 2
-    [Console]::WindowHeight = $height + 3
-    [Console]::WindowWidth = $width + 2
+    # Guard: if we can't resize the console buffer, the game grid math breaks.
+    # Non-functional consoles (redirected, constrained) must bail before the loop.
+    try {
+        [Console]::BufferHeight = $height + 3
+        [Console]::BufferWidth = $width + 2
+        [Console]::WindowHeight = $height + 3
+        [Console]::WindowWidth = $width + 2
+    } catch {
+        # Console can't be resized — non-interactive or constrained buffer.
+        [Console]::CursorVisible = $true
+        return
+    }
 
     try {
         while ($true) {
