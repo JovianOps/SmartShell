@@ -321,7 +321,11 @@ function Invoke-Snake {
     # Uses ASCII chars for consistent console width (emoji are 2-col, breaks grid math).
 
     # Guard: refuse to run without a real interactive console
+    # ponytail: $Host.Name=ConsoleHost + UserInteractive=$true is insufficient —
+    # Gateway invocations via cmd /c get a real console but redirected stdin,
+    # so [Console]::KeyAvailable throws. Test actual console I/O availability.
     if ($Host.Name -ne 'ConsoleHost' -or [Environment]::UserInteractive -eq $false) { return }
+    try { $null = [Console]::KeyAvailable } catch { return }
 
     $width = 40
     $height = 20
@@ -429,6 +433,7 @@ function Invoke-Snake {
 }
 
 function PlaceFood($snake, [int]$width, [int]$height, [System.Random]$rng) {
+    if (-not $rng) { $rng = [System.Random]::new() }
     do {
         $fx = $rng.Next(0, $width)
         $fy = $rng.Next(0, $height)
