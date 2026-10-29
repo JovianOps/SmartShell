@@ -72,6 +72,144 @@ $EmojiColor = @{
     "🥶" = "Blue"
 }
 
+# --- Chickensay (forked from Posh-Cowsay, chicken-ified) ---
+$chickenBubbleWidth = 40
+$chickenModes = @{
+  "-b" = @("==", " ") # Borg
+  "-d" = @("XX", "U") # Dead
+  "-g" = @('$$', ' ') # Greedy
+  "-p" = @("@@", " ") # Paranoid
+  "-s" = @("**", "U") # Stoned
+  "-y" = @("..", " ") # Youthful
+  "-c" = @("==", "U") # Chicken
+}
+
+function Invoke-Chickensay {
+  param(
+    [string[]]$Message,
+    [string]$Eyes = "oo",
+    [string]$Tongue = " "
+  )
+
+  # Build message from args or piped input
+  $inputList = @($input)
+  if ($inputList.Count -eq 0) {
+    $params = ,$Message
+  } else {
+    $params = ,$Message + @($inputList)
+  }
+  $message = [string[]]$params
+  $message = $message | Where-Object { $_ -ne $null }
+
+  Print-ChickenBubble($message)
+  Print-Chicken $Eyes $Tongue
+}
+
+function Print-ChickenBubble($message) {
+  $lines = Convert-ChickenMessageToLines($message)
+  $lineWidth = Max-ChickenWidth($lines)
+
+  Write-ChickenBubbleBoundaryLine -lineWidth $lineWidth -boundaryChar '_'
+
+  foreach ($index in 0..($lines.length - 1)) {
+    $delimiters = Determine-ChickenBubbleDelimiters $index $lines.length
+    $paddedLine = ' ' + $lines[$index] + ' '
+    Write-ChickenBubbleLine -lineWidth $lineWidth -delimiters $delimiters -text $paddedLine
+  }
+
+  Write-ChickenBubbleBoundaryLine -lineWidth $lineWidth -boundaryChar '-'
+}
+
+function Print-Chicken($eyes="oo", $tongue=" ") {
+  Write-Output "      \  ^__^"
+  Write-Output "       \ ($eyes)\_______"
+  Write-Output "         (__)\       )\/"
+  Write-Output "         ||  $tongue   |"
+  Write-Output "         ||----w |"
+  Write-Output "         ||     ||"
+}
+
+function Convert-ChickenMessageToLines($message) {
+  $words = Split-ChickenMessage $message
+  $lines = @()
+  $line = ""
+
+  foreach($word in $words) {
+    if(($line.length + $word.length + 1) -gt $chickenBubbleWidth) {
+      if($line -ne "") {
+        $lines += ,$line
+      }
+      $line = $word
+    } else {
+      if($line -eq "") {
+        $line = $word
+      } else {
+        $line += " " + $word
+      }
+    }
+  }
+
+  $lastLine = $line
+  $lines += ,$lastLine
+  return ,$lines
+}
+
+function Split-ChickenMessage($message) {
+  $wordsSplitOnSpaces = $message.split(" ")
+  $words = [string[]]@()
+  foreach($longWord in $wordsSplitOnSpaces) {
+    $splitWords = Split-ChickenWord($longWord)
+    foreach($word in $splitWords) {
+      if($word -ne "") {
+        $words+= ,[string]$word
+      }
+    }
+  }
+  return ,[string[]]$words
+}
+
+function Split-ChickenWord($word) {
+  if($word.length -le $chickenBubbleWidth) {
+    return ,[string[]]@($word)
+  }
+  $splits = [string[]]@()
+  foreach($i in (0..([Math]::Floor($word.length / $chickenBubbleWidth)))) {
+    $startPoint = ($i * $chickenBubbleWidth)
+    if(($startPoint + $chickenBubbleWidth) -ge $word.length) {
+      $splits += $word.substring($startPoint)
+    } else {
+      $splits += $word.substring($startPoint, $chickenBubbleWidth)
+    }
+  }
+  return ,[string[]]$splits
+}
+
+function Max-ChickenWidth($lines) {
+  $maxLength = 0
+  foreach($line in $lines) {
+    if($line.length -gt $maxLength) {
+      $maxLength = $line.length
+    }
+  }
+  return $maxLength
+}
+
+function Write-ChickenBubbleBoundaryLine($lineWidth, $boundaryChar) {
+  Write-ChickenBubbleLine -lineWidth $lineWidth -delimiters '  ' -text ("".PadRight($lineWidth + 2, $boundaryChar))
+}
+
+function Write-ChickenBubbleLine($lineWidth, $delimiters, $text) {
+  $line = $delimiters[0] + ($text.padRight($lineWidth + 2, ' ')) + $delimiters[1]
+  Write-Output $line.trimEnd()
+}
+
+function Determine-ChickenBubbleDelimiters($lineNumber, $totalNumberOfLines) {
+  if($totalNumberOfLines -eq 1) { return '<>' }
+  if($lineNumber -eq 0) { return '/\' }
+  if($lineNumber -eq ($totalNumberOfLines - 1)) { return '\/' }
+  return '||'
+}
+
 function Get-Time {
     $tz = [System.TimeZoneInfo]::Local
     $now = Get-Date
@@ -491,6 +629,15 @@ function Smart-Write {
         "^temp$" { Get-TempInfo }
         "^system$" { Get-SystemInfo }
         "^snake$" { Invoke-Snake }
+        "^chicken(?:\s+(-[bcdgspy]))?\s+(.+)$" {
+            $eyes = "oo"; $tongue = " "
+            if ($matches[1] -and $chickenModes.ContainsKey($matches[1])) {
+                $eyes = $chickenModes[$matches[1]][0]
+                $tongue = $chickenModes[$matches[1]][1]
+            }
+            Invoke-Chickensay -Message $matches[2] -Eyes $eyes -Tongue $tongue
+        }
+        "^chicken$" { Invoke-Chickensay -Message "Bock!" }
         "^memory$" { Get-MemoryInfo }
         "^mem$" { Get-MemoryInfo }
         "^ip$" { Get-NetworkInfo }
@@ -538,6 +685,8 @@ Available commands:
   calc <expr>     - Calculate expression (e.g. calc 2*3+5)
   echo <message>  - Echo message (with emoji expressions)
   close <name>    - Close process by partial name (e.g. close roblox)
+  chicken [msg]   - Chicken says something (e.g. chicken shut up)
+                    Modes: -b Borg, -d Dead, -s Stoned, -c Chicken
   help            - Show this help
 '@ -ForegroundColor Cyan
         }
