@@ -28,6 +28,7 @@ smartshell uptime        # Show system uptime
 smartshell disk          # Show disk usage
 smartshell temp          # Show disk, CPU, GPU temperatures
 smartshell system        # Show system overview (CPU, GPU, RAM, disk, battery)
+smartshell snake         # Play Snake (arrow keys to steer, Escape to quit)
 smartshell memory        # Show RAM usage
 smartshell ip            # Show local IP + bandwidth usage
 smartshell internet      # Show public IP + bandwidth usage
@@ -42,7 +43,7 @@ smartshell whoami        # Show current user
 smartshell help          # Show all commands
 smartshell echo I am happy  # Echo with emoji reaction
 smartshell calc 2*3+5    # Calculate expression
-smartshell close <name>  # Close process by partial name (picks from matches)
+smartshell close <name>  # Close process by partial name (auto-kills all matches)
 ```
 
 ### CPU Usage
@@ -91,6 +92,10 @@ The `system` command shows a one-line overview of your entire machine:
 - RAM: used/total with color emoji
 - Disk: used/total with color emoji (🔴 >80%, 🟡 >60%, 🟢 below)
 - Battery: percentage + charging/discharging (only on laptops)
+
+### Snake
+
+The `snake` command launches a playable Snake game with arrow-key controls. The snake wraps around screen edges. Food appears as 🍎, the head as 🟪, and the body as 🟦. The game speeds up as you score. Press Escape to quit.
 
 ### Temperature
 

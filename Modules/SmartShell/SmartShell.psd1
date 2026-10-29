@@ -5,7 +5,7 @@
     Author            = 'Athalla'
     CompanyName       = 'Vortex Industries'
     Description       = 'Expressive terminal with emoji reactions'
-    FunctionsToExport = @('Smartshell', 'Smart-Write', 'Get-Time', 'Get-DateInfo', 'Get-DiskInfo', 'Get-TempInfo', 'Get-SystemInfo', 'Get-Uptime', 'Get-MemoryInfo', 'Get-NetworkInfo', 'Get-InternetInfo', 'Get-Weather', 'Get-CpuInfo', 'Get-GpuInfo', 'Get-ProcessList', 'Get-ListeningPorts', 'Get-EnvInfo', 'Get-Whoami', 'Stop-ProcessPartial', 'Show-Expression')
+    FunctionsToExport = @('Smartshell', 'Smart-Write', 'Get-Time', 'Get-DateInfo', 'Get-DiskInfo', 'Get-TempInfo', 'Get-SystemInfo', 'Invoke-Snake', 'PlaceFood', 'Get-Uptime', 'Get-MemoryInfo', 'Get-NetworkInfo', 'Get-InternetInfo', 'Get-Weather', 'Get-CpuInfo', 'Get-GpuInfo', 'Get-ProcessList', 'Get-ListeningPorts', 'Get-EnvInfo', 'Get-Whoami', 'Stop-ProcessPartial', 'Show-Expression')
     CmdletsToExport   = @()
     VariablesToExport = @()
     AliasesToExport   = @()

@@ -315,6 +315,121 @@ function Get-SystemInfo {
     Write-Host ""
 }
 
+function Invoke-Snake {
+    # ponytail: no AI, no win condition — play until you die. Restart by typing 'snake' again.
+    # Uses ASCII chars for consistent console width (emoji are 2-col, breaks grid math).
+    $width = 40
+    $height = 20
+    $speed = 150  # ms between frames; decreases as score rises
+
+    # Directions: 0=right, 1=down, 2=left, 3=up (matches dx/dy arrays)
+    $dx = @(1, 0, -1, 0)
+    $dy = @(0, 1, 0, -1)
+
+    $dir = 0
+    $score = 0
+    $snake = [System.Collections.Generic.List[Tuple[int,int]]]::new()
+    $snake.Add([Tuple[int,int]]::new([int]($width/2), [int]($height/2)))
+    $rng = [System.Random]::new()
+
+    # Place initial food
+    $food = PlaceFood($snake, $width, $height, $rng)
+
+    # Save and clear the console
+    $origBg = [Console]::BackgroundColor
+    $origFg = [Console]::ForegroundColor
+    [Console]::CursorVisible = $false
+    [Console]::BufferHeight = $height + 3
+    [Console]::BufferWidth = $width + 2
+    [Console]::WindowHeight = $height + 3
+    [Console]::WindowWidth = $width + 2
+
+    try {
+        while ($true) {
+            # Handle input without blocking
+            if ([Console]::KeyAvailable) {
+                $key = [Console]::ReadKey($true).Key
+                switch ($key) {
+                    UpArrow    { if ($dir -ne 1) { $dir = 3 } }
+                    DownArrow  { if ($dir -ne 3) { $dir = 1 } }
+                    LeftArrow  { if ($dir -ne 0) { $dir = 2 } }
+                    RightArrow { if ($dir -ne 2) { $dir = 0 } }
+                    Escape     { return }
+                }
+            }
+
+            # Move head
+            $head = $snake[0]
+            $nx = ($head.Item1 + $dx[$dir] + $width) % $width
+            $ny = ($head.Item2 + $dy[$dir] + $height) % $height
+
+            # Check self-collision
+            for ($i = 1; $i -lt $snake.Count; $i++) {
+                if ($snake[$i].Item1 -eq $nx -and $snake[$i].Item2 -eq $ny) {
+                    [Console]::SetCursorPosition(0, $height + 1)
+                    Write-Host "  Game Over! Score: $score" -ForegroundColor Red
+                    return
+                }
+            }
+
+            # Add new head
+            $snake.Insert(0, [Tuple[int,int]]::new($nx, $ny))
+
+            # Check food
+            if ($nx -eq $food.Item1 -and $ny -eq $food.Item2) {
+                $score++
+                if ($snake.Count -gt ($width * $height - 1)) {
+                    [Console]::SetCursorPosition(0, $height + 1)
+                    Write-Host "  You win! Score: $score" -ForegroundColor Green
+                    return
+                }
+                $food = PlaceFood($snake, $width, $height, $rng)
+            } else {
+                # Remove tail
+                $snake.RemoveAt($snake.Count - 1)
+            }
+
+            # Draw
+            [Console]::SetCursorPosition(0, 0)
+            $sb = New-Object System.Text.StringBuilder
+            for ($y = 0; $y -lt $height; $y++) {
+                for ($x = 0; $x -lt $width; $x++) {
+                    if ($x -eq $food.Item1 -and $y -eq $food.Item2) {
+                        $sb.Append("@") | Out-Null
+                    } elseif ($x -eq $snake[0].Item1 -and $y -eq $snake[0].Item2) {
+                        $sb.Append("O") | Out-Null
+                    } elseif ($snake | Where-Object { $_.Item1 -eq $x -and $_.Item2 -eq $y }) {
+                        $sb.Append("o") | Out-Null
+                    } else {
+                        $sb.Append(" ") | Out-Null
+                    }
+                }
+                $sb.AppendLine() | Out-Null
+            }
+            # Score line below the grid
+            $sb.AppendLine("Score: $score") | Out-Null
+            [Console]::Write($sb.ToString())
+
+            # Speed increases: faster as score rises
+            $delay = [math]::Max(50, $speed - ($score * 5))
+            Start-Sleep -Milliseconds $delay
+        }
+    } finally {
+        [Console]::SetCursorPosition(0, 0)
+        [Console]::CursorVisible = $true
+        [Console]::BackgroundColor = $origBg
+        [Console]::ForegroundColor = $origFg
+    }
+}
+
+function PlaceFood($snake, [int]$width, [int]$height, [System.Random]$rng) {
+    do {
+        $fx = $rng.Next(0, $width)
+        $fy = $rng.Next(0, $height)
+    } while ($snake | Where-Object { $_.Item1 -eq $fx -and $_.Item2 -eq $fy })
+    return [Tuple[int,int]]::new($fx, $fy)
+}
+
 function Stop-ProcessPartial {
     param([string]$Name)
     $procs = Get-Process | Where-Object { $_.ProcessName -like "*$Name*" }
@@ -351,6 +466,7 @@ function Smart-Write {
         "^disk$" { Get-DiskInfo }
         "^temp$" { Get-TempInfo }
         "^system$" { Get-SystemInfo }
+        "^snake$" { Invoke-Snake }
         "^memory$" { Get-MemoryInfo }
         "^mem$" { Get-MemoryInfo }
         "^ip$" { Get-NetworkInfo }
@@ -384,6 +500,7 @@ Available commands:
   disk            - Show disk usage
   temp            - Show disk, CPU, GPU temperatures
   system          - Show system overview (CPU, GPU, RAM, disk, battery)
+  snake           - Play Snake (arrow keys to steer; Escape to quit)
   memory / mem    - Show RAM usage
   ip / network    - Show network IP
   internet        - Show public IP and bandwidth usage
@@ -435,4 +552,4 @@ function Smartshell {
     }
 }
 
-Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-TempInfo, Get-SystemInfo, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-InternetInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Stop-ProcessPartial, Show-Expression
+Export-ModuleMember -Function Smartshell, Smart-Write, Get-Time, Get-DateInfo, Get-DiskInfo, Get-TempInfo, Get-SystemInfo, Invoke-Snake, PlaceFood, Get-Uptime, Get-MemoryInfo, Get-NetworkInfo, Get-InternetInfo, Get-Weather, Get-CpuInfo, Get-GpuInfo, Get-ProcessList, Get-ListeningPorts, Get-EnvInfo, Get-Whoami, Stop-ProcessPartial, Show-Expression
